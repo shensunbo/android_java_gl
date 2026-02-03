@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">timer2</string>
+    <string name="greeting_message">Hello %1$s!</string>
 </resources>
