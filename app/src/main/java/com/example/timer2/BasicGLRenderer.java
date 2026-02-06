@@ -17,14 +17,17 @@ public class BasicGLRenderer implements GLSurfaceView.Renderer {
     private int positionHandle;
     private FloatBuffer vertexBuffer;
 
-    // 三角形顶点坐标
+    // Rectangle vertex coordinates (composed of 2 triangles)
     private static final float[] TRIANGLE_COORDS = {
-            0.0f,  0.622008459f, 0.0f,   // 顶点
-            -0.5f, -0.311004243f, 0.0f,  // 左下
-            0.5f, -0.311004243f, 0.0f    // 右下
+            -1.0f,  0.5f, 0.0f,   // top-left
+            -1.0f, -0.5f, 0.0f,   // bottom-left
+             1.0f, -0.5f, 0.0f,   // bottom-right
+            -1.0f,  0.5f, 0.0f,   // top-left
+             1.0f, -0.5f, 0.0f,   // bottom-right
+             1.0f,  0.5f, 0.0f    // top-right
     };
 
-    // 颜色 (R, G, B, A)
+    // Color (R, G, B, A)
     private static float[] COLOR = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
 
     private String vertexShaderCode;
@@ -34,12 +37,15 @@ public class BasicGLRenderer implements GLSurfaceView.Renderer {
     private int textureId;
     private FloatBuffer texCoordBuffer;
     private static final float[] TEX_COORDS = {
-        0.5f, 0.0f, // 顶点
-        0.0f, 1.0f, // 左下
-        1.0f, 1.0f  // 右下
+        0.0f, 0.0f, // top-left
+        0.0f, 1.0f, // bottom-left
+        1.0f, 1.0f, // bottom-right
+        0.0f, 0.0f, // top-left
+        1.0f, 1.0f, // bottom-right
+        1.0f, 0.0f  // top-right
     };
 
-    // 构造函数，接收着色器代码
+    // Constructor, receives shader code
     public BasicGLRenderer(android.content.Context context, String vertexShaderCode, String fragmentShaderCode, int textureResId) {
         this.context = context;
         this.vertexShaderCode = vertexShaderCode;
@@ -119,8 +125,8 @@ public class BasicGLRenderer implements GLSurfaceView.Renderer {
             texCoordHandle, 2, GLES20.GL_FLOAT, false, 8, texCoordBuffer
         );
 
-        // 绘制三角形
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        // 绘制矩形 (2个三角形 = 6个顶点)
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
 
         // 禁用顶点数组
         GLES20.glDisableVertexAttribArray(positionHandle);
@@ -128,7 +134,7 @@ public class BasicGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
     }
 
-    /** 随机颜色 (RGBA)，供外部调用后请求重绘。 */
+    /** Random color (RGBA), call externally then request render. */
     public void randomizeColor() {
         COLOR[0] = (float) Math.random();
         COLOR[1] = (float) Math.random();
@@ -137,7 +143,7 @@ public class BasicGLRenderer implements GLSurfaceView.Renderer {
     }
 
     private void initVertexData() {
-        // 分配本地内存空间
+        // Allocate native memory
         ByteBuffer bb = ByteBuffer.allocateDirect(TRIANGLE_COORDS.length * 4);
         bb.order(ByteOrder.nativeOrder());
         vertexBuffer = bb.asFloatBuffer();
@@ -146,7 +152,7 @@ public class BasicGLRenderer implements GLSurfaceView.Renderer {
     }
 
     private void initTexCoordData() {
-        // 分配本地内存空间
+        // Allocate native memory
         ByteBuffer bb = ByteBuffer.allocateDirect(TEX_COORDS.length * 4);
         bb.order(ByteOrder.nativeOrder());
         texCoordBuffer = bb.asFloatBuffer();
@@ -159,13 +165,13 @@ public class BasicGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glShaderSource(shader, shaderCode);
         GLES20.glCompileShader(shader);
 
-        // 检查编译状态
+        // Check compile status
         int[] compiled = new int[1];
         GLES20.glGetShaderiv(shader, GLES20.GL_COMPILE_STATUS, compiled, 0);
         if (compiled[0] == 0) {
             String log = GLES20.glGetShaderInfoLog(shader);
             GLES20.glDeleteShader(shader);
-            throw new RuntimeException("着色器编译失败: " + log);
+            throw new RuntimeException("Shader compilation failed: " + log);
         }
         return shader;
     }

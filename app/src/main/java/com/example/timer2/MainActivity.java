@@ -2,10 +2,6 @@ package com.example.timer2;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
-import android.widget.TextView;
-import android.widget.Button;
-import android.widget.Toast;
-import android.view.View;
 import android.os.Handler;
 import android.util.Log;
 import android.opengl.GLSurfaceView;
@@ -14,8 +10,6 @@ public class MainActivity extends AppCompatActivity {
     private Handler handler = new Handler();
     private Runnable updateTimeTask;
     private Test test;
-    private TextView greetingText;
-    private Button showAlertButton;
     private GLSurfaceView glSurfaceView;
     private BasicGLRenderer renderer;
 
@@ -42,11 +36,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        test = new Test("I am a new class", 10);
-        greetingText = findViewById(R.id.greetingText);
         glSurfaceView = findViewById(R.id.glSurfaceView);
-
-        showAlertButton = findViewById(R.id.showAlertButton);
 
         // Set up OpenGL surface and renderer
         glSurfaceView.setEGLContextClientVersion(2);
@@ -59,37 +49,9 @@ public class MainActivity extends AppCompatActivity {
         glSurfaceView.setRenderer(renderer);
         glSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
-        showAlertButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i("MainActivity", "click");
-                Toast.makeText(MainActivity.this,
-                    "Time to go !!!", Toast.LENGTH_SHORT).show();
-                // 随机变换三角形颜色，并请求重绘
-                renderer.randomizeColor();
-                glSurfaceView.requestRender();
-                    
-                    
-            }
-        });
-
         Log.i("MainActivity", "String resource ID: " + R.string.greeting_message);
 
-        updateTimeTask = new Runnable() {
-            @Override
-            public void run() {
-                greetingText.setText(getString(R.string.greeting_message, String.valueOf(test.getTimer())));
-                test.updateTimer();
-                if(test.getTimer() == 0) {
-                    Toast.makeText(MainActivity.this,
-                            "happy new year !!!", Toast.LENGTH_SHORT).show();
-                    test.resetTimer(10);
-                }
-
-                handler.postDelayed(this, 1000);
-            }
-        };
-        handler.post(updateTimeTask);
+        // 移除 updateTimeTask 和 Toast/greetingText 相关代码
     }
 
     @Override
@@ -98,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         handler.removeCallbacks(updateTimeTask);
     }
 
-     @Override
+    @Override
     protected void onStart() {
         super.onStart();
         Log.i("MainActivity", "onStart called");
